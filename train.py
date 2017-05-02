@@ -23,7 +23,7 @@ def load_data(is_train=True):
     '''
 
     import numpy as np
-    quizzes = np.zeros((1000000, 81), np.int32)
+    quizzes = np.zeros((1000000, 81), np.float32)
     solutions = np.zeros((1000000, 81), np.int32)
     for i, line in enumerate(open('data/sudoku.csv', 'r').read().splitlines()[1:]):
         quiz, solution = line.split(",")
