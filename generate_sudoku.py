@@ -180,7 +180,9 @@ def main(num):
 
         if (i+1) % 1000 == 0:
             print i+1
-            np.save('data/sudoku.npz', quizzes=quizzes, solutions=solutions)
+            #np.savez('data/sudoku.npz', quizzes=quizzes, solutions=solutions)
+            np.save('data/sudoku_quizzes.npy', quizzes)
+            np.save('data/sudoku_solutions.npy', solutions)
 
 if __name__ == "__main__":
     main(1000000)

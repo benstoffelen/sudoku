@@ -21,8 +21,18 @@ def load_data(is_train=True):
       Y: 3-D array of int. Has the shape of (# total games, 9, 9) (for train) 
         or (batch_size, 9, 9) (for validation)            
     '''
-    X = np.load('data/sudoku_quizzes.npy').astype(np.float32)
-    Y = np.load('data/sudoku_solutions.npy')
+
+    import numpy as np
+    quizzes = np.zeros((1000000, 81), np.int32)
+    solutions = np.zeros((1000000, 81), np.int32)
+    for i, line in enumerate(open('sudoku.csv', 'r').read().splitlines()[1:]):
+        quiz, solution = line.split(",")
+        for j, q_s in enumerate(zip(quiz, solution)):
+            q, s = q_s
+            quizzes[i, j] = q
+            solutions[i, j] = s
+    X = quizzes.reshape((-1, 9, 9))
+    Y = solutions.reshape((-1, 9, 9))
     
     X = np.expand_dims(X, -1)
     
@@ -58,7 +68,7 @@ def get_batch_data(is_train=True):
                                   min_after_dequeue=Hyperparams.batch_size*32, 
                                   allow_smaller_final_batch=False)
     # calc total batch count
-    num_batch = len(X) // batch_size 
+    num_batch = len(X) // Hyperparams.batch_size
     
     return x, y, num_batch  # (64, 9, 9, 1), (64, 9, 9), ()
 
