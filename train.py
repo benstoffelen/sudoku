@@ -5,8 +5,10 @@ import numpy as np
 # set log level to debug
 tf.sg_verbosity(10)
 
+
 class Hyperparams:
     batch_size = 64
+
 
 def load_data(is_train=True):
     '''Loads training / validation data.
@@ -22,7 +24,6 @@ def load_data(is_train=True):
         or (batch_size, 9, 9) (for validation)            
     '''
 
-    import numpy as np
     quizzes = np.zeros((1000000, 81), np.float32)
     solutions = np.zeros((1000000, 81), np.int32)
     for i, line in enumerate(open('data/sudoku.csv', 'r').read().splitlines()[1:]):
@@ -33,14 +34,15 @@ def load_data(is_train=True):
             solutions[i, j] = s
     X = quizzes.reshape((-1, 9, 9))
     Y = solutions.reshape((-1, 9, 9))
-    
+
     X = np.expand_dims(X, -1)
-    
+
     if is_train:
-        return X[:-Hyperparams.batch_size], Y[:-Hyperparams.batch_size] # training data
+        return X[:-Hyperparams.batch_size], Y[:-Hyperparams.batch_size]  # training data
     else:
-        return X[-Hyperparams.batch_size:], Y[-Hyperparams.batch_size:] # validation data
-        
+        return X[-Hyperparams.batch_size:], Y[-Hyperparams.batch_size:]  # validation data
+
+
 def get_batch_data(is_train=True):
     '''Returns batch data.
     
@@ -55,22 +57,23 @@ def get_batch_data(is_train=True):
         num_batch = A Python int. Number of batches.
     '''
     X, Y = load_data(is_train=is_train)
-    
+
     # Create Queues
-    input_queues = tf.train.slice_input_producer([tf.convert_to_tensor(X), 
-                                                  tf.convert_to_tensor(Y)]) 
-    
+    input_queues = tf.train.slice_input_producer([tf.convert_to_tensor(X),
+                                                  tf.convert_to_tensor(Y)])
+
     # create batch queues
     x, y = tf.train.shuffle_batch(input_queues,
                                   num_threads=8,
-                                  batch_size=Hyperparams.batch_size, 
-                                  capacity=Hyperparams.batch_size*64,
-                                  min_after_dequeue=Hyperparams.batch_size*32, 
+                                  batch_size=Hyperparams.batch_size,
+                                  capacity=Hyperparams.batch_size * 64,
+                                  min_after_dequeue=Hyperparams.batch_size * 32,
                                   allow_smaller_final_batch=False)
     # calc total batch count
     num_batch = len(X) // Hyperparams.batch_size
-    
+
     return x, y, num_batch  # (64, 9, 9, 1), (64, 9, 9), ()
+
 
 class Graph(object):
     def __init__(self, is_train=True):
@@ -87,26 +90,29 @@ class Graph(object):
                 self.logits = (self.logits.sg_conv(dim=512))
 
             self.logits = self.logits.sg_conv(dim=10, size=1, act='linear', bn=False)
-            
+
         if is_train:
             self.ce = self.logits.sg_ce(target=self.y, mask=False)
             self.istarget = tf.equal(self.x.sg_squeeze(), tf.zeros_like(self.x.sg_squeeze())).sg_float()
             self.loss = self.ce * self.istarget
             self.reduced_loss = self.loss.sg_sum() / self.istarget.sg_sum()
             tf.sg_summary_loss(self.reduced_loss, "reduced_loss")
-            
+
             # accuracy evaluation ( for validation set )
             self.preds_ = (self.logits.sg_reuse(input=self.x_val).sg_argmax()).sg_int()
             self.hits_ = tf.equal(self.preds_, self.y_val).sg_float()
             self.istarget_ = tf.equal(self.x_val.sg_squeeze(), tf.zeros_like(self.x_val.sg_squeeze())).sg_float()
             self.acc = (self.hits_ * self.istarget_).sg_sum() / self.istarget_.sg_sum()
 
+
 def main():
     g = Graph()
-    
-    tf.sg_train(lr=0.0001, lr_reset=True, log_interval=10, save_interval=300, 
-                loss=g.reduced_loss, eval_metric=[g.acc], 
+
+    tf.sg_train(lr=0.0001, lr_reset=True, log_interval=10, save_interval=300,
+                loss=g.reduced_loss, eval_metric=[g.acc],
                 ep_size=g.num_batch, save_dir='asset/train', max_ep=10, early_stop=False)
-    
+
+
 if __name__ == "__main__":
-    main(); print "Done"
+    main();
+    print("Done")

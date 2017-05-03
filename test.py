@@ -670,7 +670,7 @@ def test1():
                 total_hits += hits
                 break
                  
-        print "Total Accuracy = %d/%d=%.2f" % (total_hits, total_blanks, float(total_hits)/total_blanks)
+        print("Total Accuracy = %d/%d=%.2f" % (total_hits, total_blanks, float(total_hits)/total_blanks))
 
 def test2():
     '''
@@ -717,16 +717,16 @@ def test2():
                     
                     result = np.where(_x_2d == 0, x_2d, y_2d).astype(int)
                     
-                    print result
-                    print "Acc.=%d/%d=%.2f" % (hits, len(expected), float(hits)/len(expected))
+                    print(result)
+                    print("Acc.=%d/%d=%.2f" % (hits, len(expected), float(hits)/len(expected)))
                      
                     total_blanks += len(expected)
                     total_hits += hits
                     break
                  
-        print "Total Accuracy = %d/%d=%.2f" % (total_hits, total_blanks, float(total_hits)/total_blanks)
+        print("Total Accuracy = %d/%d=%.2f" % (total_hits, total_blanks, float(total_hits)/total_blanks))
                     
 if __name__ == '__main__':
     test1()
 #     test2()
-    print "Done"
+    print("Done")
